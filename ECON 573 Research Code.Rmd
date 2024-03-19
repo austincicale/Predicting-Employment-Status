@@ -1,0 +1,424 @@
+---
+title: "ECON 573 Research Project"
+output: html_document
+date: '2023-11-12'
+---
+
+### Loading Packages ###
+```{r}
+library(dplyr)
+library(ggplot2)
+install.packages("data.table")
+library(data.table)
+install.packages("ROSE")
+library(ROSE)
+library(randomForest)
+library(MASS)
+library(e1071)
+library(caret)
+library(class)
+```
+
+
+### Data Cleaning ###
+```{r}
+# Import uncleaned data
+uncleaned_data <- fread("/Users/austincicale/Downloads/usa_00002.csv.gz")
+```
+
+```{r}
+# Remove unnecessary and redundant variables from uncleaned data set
+data <- uncleaned_data[, -c(1:10, 14, 19, 21, 26, 28:32, 34:35, 37:39)]
+```
+
+```{r}
+# Remove NA observations from data
+data <- subset(data, 
+                  CITIZEN != 0 &
+                  YRSUSA2 != 0 &
+                  SPEAKENG != 0 &
+                  SCHOOL != 0 &
+                  EDUCD != 1 &
+                  !(EMPSTAT %in% c(0, 3)) &
+                  VETSTAT != 0)
+```
+
+
+### Data Manipulation ###
+```{r}
+# Combine specified observations in the EDUCD variable
+data$EDUCD[data$EDUCD %in% c(11, 12)] <- 3
+data$EDUCD[data$EDUCD %in% c(14:17, 22)] <- 4
+data$EDUCD[data$EDUCD %in% c(23, 25, 26)] <- 5
+data$EDUCD[data$EDUCD %in% c(30, 40, 50)] <- 6
+data$EDUCD[data$EDUCD %in% c(65, 71)] <- 7
+
+# Variables to convert from Numeric to Factor
+variables_to_convert <- c("RELATE", "SEX", "MARST", "RACE", 
+                           "HISPAN", "CITIZEN", "YRSUSA2", "SPEAKENG", 
+                           "SCHOOL", "EDUCD", 
+                           "EMPSTAT", "VETSTAT")
+
+# Loop through each variable and convert to factor
+for (variable in variables_to_convert) {
+  data[[variable]] <- factor(data[[variable]])
+}
+```
+
+```{r}
+# Change level values for EMPSTAT, SEX, and VETSTAT
+levels(data$EMPSTAT) <- c("Employed", "Unemployed")
+levels(data$SEX) <- c("Male", "Female")
+levels(data$VETSTAT) <- c("Not a veteran", "Veteran")
+
+# Convert numeric variables to integers as needed
+data$FAMSIZE <- as.integer(data$FAMSIZE)
+data$NCHILD <- as.integer(data$NCHILD)
+data$AGE <- as.integer(data$AGE)
+```
+
+```{r}
+# Split the data set into employed and unemployed to obtain data statistics 
+employed_data = subset(data, EMPSTAT == "Employed")
+unemployed_data = subset(data, EMPSTAT == "Unemployed")
+```
+
+
+### Basic Logistic Model ###
+```{r}
+# Create a logistic model using all variables and all of the cleaned data
+glm.emp1 <- glm(EMPSTAT ~., family = "binomial", data = data)
+summary(glm.emp1)
+
+# Confusion matrix
+glm.probs1 <- predict(glm.emp1, type = "response")
+glm.pred1 <- rep("Employed", 261202)
+glm.pred1[glm.probs1 > 0.5] <- "Unemployed"
+table(glm.pred1, data$EMPSTAT)
+```
+
+Insignificant Variables: FAMSIZE, NCHILD, CITIZEN, VETSTAT
+The problem with this model is that it made no "Unemployed" predictions. There is a large imbalance between classes (employed data greatly outweighs unemployed data). To address this, we will reduce the sample size and make the class representation slightly more balanced. 
+
+```{r}
+# Create a more balanced data set 
+set.seed(1)
+employed_sample <- employed_data[sample(nrow(employed_data), 50000), ]
+data2 <- rbind(employed_sample, unemployed_data)
+
+# Create a completely balanced data set
+set.seed(1)
+employed_sample2 <- employed_data[sample(nrow(employed_data), 16068), ]
+data3 <- rbind(employed_sample2, unemployed_data)
+```
+
+```{r}
+# Create a logistic model using all variables and relatively balanced data
+glm.emp2 = glm(EMPSTAT ~., family = "binomial", data = data2)
+summary(glm.emp2)
+
+# Confusion matrix and success rate
+glm.probs2 = predict(glm.emp2, type = "response")
+glm.pred2 = rep("Employed", 66068)
+glm.pred2[glm.probs2 > 0.5] = "Unemployed"
+table(glm.pred2, data2$EMPSTAT)
+mean(glm.pred2 == data2$EMPSTAT)
+```
+
+For the most part we still have the same insignificant variables, except we can see that CITIZEN is significant. 
+Looking at the confusion matrix, we can see that the logistic model correctly predicted employment status 75.58% of the time. The model correctly predicted "Unemployed" 114 times and incorrectly predicted "Unemployed" 15954 times. The model correctly predicted "Employed" 49819 times and incorrectly predicted "Employed" 181 times. 
+
+```{r}
+# Create a logistic model using all variables and completely balanced data
+glm.emp3 = glm(EMPSTAT ~., family = "binomial", data = data3)
+summary(glm.emp3)
+
+# Confusion matrix and success rate
+glm.probs3 = predict(glm.emp3, type = "response")
+glm.pred3 = rep("Employed", 32136)
+glm.pred3[glm.probs3 > 0.5] = "Unemployed"
+table(glm.pred3, data3$EMPSTAT)
+mean(glm.pred3 == data3$EMPSTAT)
+```
+
+Balancing the data increased prediction success rate for "Unemployed" but decreased prediction success for "Employed"
+We will continue with the validation set approach to test the models on holdout data
+For future logistic models, we will leave out NCHILD, FAMSIZE, and VETSTAT as predictors
+In future logistic models, we will also might try lowering the classification threshold rather than balancing the data.
+We will take our full cleaned data set and randomly select 70% of it to make the training set. The remaining observations will be used as the validation set.
+
+
+### Splitting Data into Training and Validation Sets
+```{r}
+# Splitting data into Training and Testing
+set.seed(1)
+# Generating random indices for train-test split
+indices1 <- sample(1:nrow(data), size = round(0.7 * nrow(data)), replace = FALSE)
+# Creating training and testing sets
+train1 <- data[indices1, ]
+test1 <- data[-indices1, ]
+```
+
+
+### Testing Trained Logistic Model on Validation Set ###
+```{r}
+# Fit logistic regression model using training data
+glm.emp4 <- glm(EMPSTAT ~. -NCHILD -FAMSIZE -VETSTAT, family = "binomial", data = train1)
+# Obtain prediction of employment status for each individual in the test set
+glm.probs4 <- predict(glm.emp4, newdata = test1, type = "response")
+glm.pred4 <- rep("Employed", 78361)
+glm.pred4[glm.probs4 > 0.5] <- "Unemployed"
+table(glm.pred4, test1$EMPSTAT)
+mean(glm.pred4 == test1$EMPSTAT)
+```
+
+With a classification threshold of 0.5, we got no "Unemployed" predictions. We will use the ROSE package to perform oversampling to deal with the class imbalance in our data. Oversampling will be used on the training set, but we will keep the test set the same.
+
+
+### Oversampling the Training Set ###
+```{r}
+# Perform oversampling on the training data to have more balanced classes
+train2 <- ROSE(EMPSTAT ~., data = train1, seed = 123)$data
+
+# Modify FAMSIZE, NCHILD, and AGE accordingly
+train2 <- train2 %>%
+  mutate(FAMSIZE <- pmax(1, pmin(20, round(FAMSIZE))),
+         NCHILD <- pmax(0, pmin(9, round(NCHILD))),
+         AGE <- pmax(17, round(AGE)))
+
+# Ensure these variables are integers
+train2$FAMSIZE <- as.integer(train2$FAMSIZE)
+train2$NCHILD <- as.integer(train2$NCHILD)
+train2$AGE <- as.integer(train2$AGE)
+```
+
+```{r}
+summary(train2)
+summary(train1)
+```
+
+The ROSE package was used to generate a synthetic balanced sample (train2) and thus allows to strengthen the subsequent estimation of any binary classifier. Rose is a bootstrap-based technique which aids the task of binary classification in the presence of rare classes.
+
+
+### Train Logistic Model with New Oversampled Training Set ###
+```{r}
+# Fit logistic regression model using over sampled training data
+glm.emp5 <- glm(EMPSTAT ~.-NCHILD -FAMSIZE -VETSTAT, family = "binomial", data = train2)
+summary(glm.emp5)
+# Obtain prediction of employment status for each individual in the test set
+glm.probs5 <- predict(glm.emp5, newdata = test1, type = "response")
+glm.pred5 <- rep("Employed", 78361)
+glm.pred5[glm.probs5 > 0.5] <- "Unemployed"
+table(glm.pred5, test1$EMPSTAT)
+mean(glm.pred5 == test1$EMPSTAT)
+```
+
+All variables in this model are statistically significant.
+Success Rate: 59.62%
+Employed Success Rate: 59.62%
+Unemployed Success Rate: 59.59%
+
+
+### LDA/QDA ###
+```{r}
+# Train and test model using LDA
+set.seed(123)
+library(MASS)
+lda.fit1 <- lda(EMPSTAT ~.-NCHILD -FAMSIZE -VETSTAT, data = train2)
+lda.pred1 <- predict(lda.fit1, test1)
+table(lda.pred1$class, test1$EMPSTAT)
+```
+
+Success Rate: 59.69%
+Employed Success Rate: 59.70%
+Unemployed Success Rate: 59.59%
+
+```{r}
+# Train and test model using QDA
+qda.fit1 <- qda(EMPSTAT ~.-NCHILD -FAMSIZE -VETSTAT, data = train2)
+qda.pred1 <- predict(qda.fit1, test1)
+table(qda.pred1$class, test1$EMPSTAT)
+```
+
+Success Rate: 66.94%
+Employed Success Rate: 68.13%
+Unemployed Success Rate: 48.79%
+
+
+### Classification Trees ###
+```{r}
+# Load Packages
+install.packages("rpart")
+library(rpart)
+install.packages("rpart.plot")
+library(rpart.plot)
+```
+
+```{r}
+# Train and test model using Classification Trees
+set.seed(1)
+tree_model <- rpart(EMPSTAT ~., data = train2, method = "class")
+
+printcp(tree_model)
+prp(tree_model, extra = 1, branch = 1, shadow.col = "gray", box.col = "lightblue", branch.lty = 3, tweak = 1.2)
+
+predictions_tree <- predict(tree_model, newdata = test1, type = "class")
+table(predictions_tree, test1$EMPSTAT)
+```
+
+Variables Included: AGE, EDUCD, RELATE, SEX
+Success Rate: 59.11%
+Employed Success Rate: 59.86%
+Unemployed Success Rate: 59.06%
+
+
+### Random Forest ###
+```{r}
+# Train and test model using Random Forest
+set.seed(123)
+
+rf_model <- randomForest(EMPSTAT ~., data = train2)
+predictions_forest <- predict(rf_model, newdata = test1)
+table(predictions_forest, test1$EMPSTAT)
+importance(rf_model)
+varImpPlot(rf_model, main = "", cex = 1.2, pch = 19, lwd = 2)
+```
+
+Top 3 Significant Variables: AGE, EDUCD, RACE
+Success Rate: 79.58%
+Employed Success Rate: 82.98%
+Unemployed Success Rate: 27.97%
+
+
+### Boosting ###
+```{r}
+# Load package
+library(gbm)
+```
+
+```{r}
+# Prepare train and test sets for Boosting by converting EMPSTAT values to 0 and 1
+train2_boost <- train2
+test1_boost <- test1
+
+train2_boost$EMPSTAT <- ifelse(train2_boost$EMPSTAT == "Employed", 0, 1)
+test1_boost$EMPSTAT <- ifelse(test1_boost$EMPSTAT == "Employed", 0, 1)
+```
+
+```{r}
+# Train and test model using Boosting
+set.seed(1)
+
+boost_model <- gbm(EMPSTAT ~., data = train2_boost, distribution = "bernoulli", n.trees = 100, interaction.depth = 3, shrinkage = 0.1)
+boost_pred <- predict(boost_model, newdata = test1_boost, type = "response", n.trees = 100)
+boost_pred_class <- ifelse(boost_pred > 0.5, 1, 0)
+table(boost_pred_class, test1_boost$EMPSTAT)
+summary(boost_model)
+```
+
+```{r}
+# Use information from boost_model summary to create relative influence plot
+
+variable_names <- c("EDUCD", "RELATE", "SEX", "AGE", "SPEAKENG", "MARST", "RACE", "FAMSIZE", "HISPAN", "YRSUSA2", "CITIZEN", "NCHILD", "SCHOOL", "VETSTAT")
+relative_influence <- c(26.8954659, 23.2950799, 11.5776106, 10.2749420, 5.8514439, 4.9117615, 4.1419822, 3.9308735, 3.4863497, 3.3267069, 1.0281384, 0.6561295, 0.6235162, 0.0000000)
+
+variable_importance <- data.frame(
+  Variable <- factor(variable_names, levels = variable_names),
+  Importance <- relative_influence
+)
+
+variable_importance <- variable_importance[order(-variable_importance$Importance), ]
+
+ggplot(variable_importance, aes(x = Variable, y = Importance)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(x = "Variable", y = "Relative Influence") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  
+  geom_text(aes(label = round(Importance, 2)), vjust = -0.5)
+```
+
+Top 4 Influential Variables: EDUCD, RELATE, SEX, AGE
+Success Rate: 61.42%
+Employed Success Rate: 61.54%
+Unemployed Success Rate: 59.59%
+
+
+### SVM ###
+```{r}
+# Prepare training set for SVM 
+set.seed(123)
+
+train2_sampled_indices <- createDataPartition(train2$EMPSTAT, p = 0.25, list = FALSE)
+
+train2_sample <- train2[train2_sampled_indices, ]
+```
+
+```{r}
+# Train and test model using SVM
+set.seed(1)
+
+svm_model <- svm(EMPSTAT ~ EDUCD + RELATE + SEX + AGE, data = train2_sample, kernel = "linear")
+
+svm_pred <- predict(svm_model, newdata = test1)
+
+table(svm_pred, test1$EMPSTAT)
+```
+
+Success Rate: 49.03%
+Employed Success Rate: 47.92%
+Unemployed Success Rate: 65.88%
+
+
+### kNN ###
+```{r}
+# Prepare training and test set for kNN
+
+train2_knn <- train2
+
+train2_knn$EMPSTAT <- ifelse(train2_knn$EMPSTAT == "Employed", 1, 2)
+
+
+non_numeric_cols <- sapply(train2_knn, function(x) !is.numeric(x))
+
+exclude_cols <- c('FAMSIZE', 'AGE', 'NCHILD', 'EMPSTAT')
+
+cols_to_encode <- names(train2_knn)[non_numeric_cols & !(names(train2_knn) %in% exclude_cols)]
+
+for (col in cols_to_encode) {
+  if (col %in% cols_to_encode) {
+    train2_knn[[col]] <- as.numeric(factor(train2_knn[[col]]))
+  }
+}
+
+
+test1_knn <- test1
+
+test1_knn$EMPSTAT <- ifelse(test1_knn$EMPSTAT == "Employed", 1, 2)
+
+for (col in cols_to_encode) {
+  if (col %in% cols_to_encode) {
+    test1_knn[[col]] <- as.numeric(factor(test1_knn[[col]]))
+  }
+}
+
+train2_knn_indices <- createDataPartition(train2_knn$EMPSTAT, p = 0.6, list = FALSE)
+
+train2_knn_sample <- train2_knn[train2_knn_indices, ]
+```
+
+```{r}
+# Train and test model using kNN, setting k=5
+set.seed(1)
+k <- 5
+knn_model <- knn(train = train2_knn_sample[, -c(12, 14, 15)],
+                test = test1_knn[, -c(12, 14, 15)],
+                cl = train2_knn_sample[, c(14)],
+                k = k)
+
+summary(knn_model)
+
+table(knn_model, test1_knn$EMPSTAT)
+```
+
+Success Rate: 60.33%
+Employed Success Rate: 61.06%
+Unemployed Success Rate: 49.29%
