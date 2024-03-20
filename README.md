@@ -15,12 +15,11 @@
 
 ### Project Overview
 
-This research project was conducted during a Machine Learning and Econometrics course (ECON 573) at The University of North Carolina at Chapel Hill throughout the Fall semester of 2023. While the research paper was a collaborative assignment, I was responsible for all programming aspects of my team's research. 
+This research project was conducted during a Machine Learning and Econometrics course (ECON 573) at The University of North Carolina at Chapel Hill throughout the Fall semester of 2023. While the research paper was a collaborative assignment, I was responsible for all programming aspects of my team's research. This project aims to predict individual employment status using machine learning techniques to identify significant variables. Understanding these predictors can aid individuals in navigating the job market, help organizations optimize recruitment strategies, and inform policy decisions focused on reducing unemployment and promoting societal equality.
 
 ### Data Sources
 
-U.S. census microdata 
-The data was sourced from IPUMS
+This project utilizes U.S. census microdata from 2021, sourced from [IPUMS USA](https://usa.ipums.org/usa/)
 
 ### Tools
 
