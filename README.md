@@ -62,8 +62,9 @@ Our data composed of 15 variables, including our employment status binary variab
 
 - Which variables play the most significant role in predicting employment status?
 - 
-<img width="472" alt="Screenshot 2024-04-05 at 2 06 51 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/3ea72fa9-8baa-450b-9ba3-54eea2dbe795">
-<img width="472" alt="Screenshot 2024-04-05 at 2 07 35 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/57574480-da19-4c3c-848d-cf096a130117">
+<img width="426" alt="Screenshot 2024-04-05 at 2 40 54 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/852c6a7e-303c-4a32-b037-a68ef6ab6680">
+<img width="426" alt="Screenshot 2024-04-05 at 2 41 28 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/44a7041c-a8ee-4530-838e-6f0f0cd32b70">
+
 
 ### Data Analysis
 
