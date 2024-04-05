@@ -19,7 +19,7 @@ This research project was conducted during a Machine Learning and Econometrics c
 
 ### Data Sources
 
-This project utilizes U.S. census microdata from 2021, sourced from [IPUMS USA](https://usa.ipums.org/usa/). The data is cross-sectional, focusing on individuals residing within the United States throughout the calendar year of 2021. Each observation within the data set represents an individual respondent.
+This project utilizes U.S. census microdata from 2021, sourced from [IPUMS USA](https://usa.ipums.org/usa/). The data is cross-sectional, focusing on individuals residing within the United States throughout 2021. Each observation within the data set represents an individual respondent.
 
 ### Tools
 
@@ -49,22 +49,19 @@ This project utilizes U.S. census microdata from 2021, sourced from [IPUMS USA](
 
 ### Data Cleaning/Preparation
 
-In the initial data preparation phase, we performed the following tasks:
+In the initial data preparation phase, the following tasks were executed:
 1. Removed all NA values and individuals not in the labor force, reducing the data from 3,252,599 observations to 261,202 observations.
 2. Removed unnecessary and redundant variables.
 3. Manipulated certain variables to simplify the data, such as merging similar education levels rather than having levels for each grade.
-4. Converted the data types for certain variables to better represent the data and enhance analysis.
-
-
-Our data composed of 15 variables, including our employment status binary variable in addition to predictors such as RACE, SEX, and EDUCATION. The majority of our variables were categorical, we only had 3 numeric variables, which were number of children in household, # of family members in household, and AGE.
+4. Converted the data types for certain variables to better reflect the data and enhance analysis.
 
 ### Exploratory Data Analysis (EDA)
 
-- Which variables play the most significant role in predicting employment status?
-- 
+Before creating predictive models, EDA involved exploring the 14 predictors related to employment status to gain deeper insights into which variables might hold the greatest significance in predicting whether someone is employed. This analysis involved comparing the characteristics of employed and unemployed individuals for each variable, which was organized into *Table 1. Descriptive Statistics of Data*.
+
+#### *Table 1. Descriptive Statistics of Data*
 <img width="426" alt="Screenshot 2024-04-05 at 2 40 54 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/852c6a7e-303c-4a32-b037-a68ef6ab6680">
 <img width="426" alt="Screenshot 2024-04-05 at 2 41 28 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/44a7041c-a8ee-4530-838e-6f0f0cd32b70">
-
 
 ### Data Analysis
 
