@@ -19,7 +19,7 @@ This research project was conducted during a Machine Learning and Econometrics c
 
 ### Data Sources
 
-This project utilizes U.S. census microdata from 2021, sourced from [IPUMS USA](https://usa.ipums.org/usa/). The data is cross-sectional, with each observation representing an individual respondent.
+This project utilizes U.S. census microdata from 2021, sourced from [IPUMS USA](https://usa.ipums.org/usa/). The data is cross-sectional, focusing on individuals residing within the United States throughout the calendar year of 2021. Each observation within the data set represents an individual respondent.
 
 ### Tools
 
@@ -49,12 +49,21 @@ This project utilizes U.S. census microdata from 2021, sourced from [IPUMS USA](
 
 ### Data Cleaning/Preparation
 
-Removed all NA values and any individual not in the labor force. After cleaning the data: we had 261,202 observations. Our data composed of 15 variables, including our employment status binary variable in addition to predictors such as RACE, SEX, and EDUCATION. The majority of our variables were categorical, we only had 3 numeric variables, which were number of children in household, # of family members in household, and AGE.
+In the initial data preparation phase, we performed the following tasks:
+1. Removed all NA values and individuals not in the labor force, reducing the data from 3,252,599 observations to 261,202 observations.
+2. Removed unnecessary and redundant variables.
+3. Manipulated certain variables to simplify the data, such as merging similar education levels rather than having levels for each grade.
+4. Converted the data types for certain variables to better represent the data and enhance analysis.
+
+
+Our data composed of 15 variables, including our employment status binary variable in addition to predictors such as RACE, SEX, and EDUCATION. The majority of our variables were categorical, we only had 3 numeric variables, which were number of children in household, # of family members in household, and AGE.
 
 ### Exploratory Data Analysis (EDA)
 
 - Which variables play the most significant role in predicting employment status?
 - 
+<img width="472" alt="Screenshot 2024-04-05 at 2 06 51 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/3ea72fa9-8baa-450b-9ba3-54eea2dbe795">
+<img width="472" alt="Screenshot 2024-04-05 at 2 07 35 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/57574480-da19-4c3c-848d-cf096a130117">
 
 ### Data Analysis
 
