@@ -19,11 +19,33 @@ This research project was conducted during a Machine Learning and Econometrics c
 
 ### Data Sources
 
-This project utilizes U.S. census microdata from 2021, sourced from [IPUMS USA](https://usa.ipums.org/usa/). This data was cross-sectional, with each observation representing an individual respondent.
+This project utilizes U.S. census microdata from 2021, sourced from [IPUMS USA](https://usa.ipums.org/usa/). The data is cross-sectional, with each observation representing an individual respondent.
 
 ### Tools
 
-- R - Data Analysis
+#### Programming Language
+- **[R](https://www.r-project.org/about.html)**:
+  - Data preprocessing
+  - Exploratory Data Analysis (EDA)
+  - Statistical analysis
+  - Data visualization
+  - Machine learning model development
+  - Reporting and documentation using R Markdown
+
+#### Libraries and Packages
+
+| Package       | Uses                                                                          |
+|---------------|-------------------------------------------------------------------------------|
+| [dplyr](https://cran.r-project.org/web/packages/dplyr/index.html)         | Data manipulation and analysis                                               |
+| [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html)       | Data visualization and plot creation                                         |
+| [ROSE](https://cran.r-project.org/web/packages/ROSE/index.html)          | Oversampling of training data for balanced classes                             |
+| [MASS](https://cran.r-project.org/web/packages/MASS/index.html)         | Linear Discriminant Analysis (LDA) and Quadratic Discriminant Analysis (QDA)   |
+| [part](https://cran.r-project.org/web/packages/rpart/index.html)         | Classification trees                                                          |
+| [randomForest](https://cran.r-project.org/web/packages/randomForest/index.html)  | Random forest modeling                                                        |
+| [gbm](https://cran.r-project.org/web/packages/gbm/index.html)           | Boosting                                                                      |
+| [e1071](https://cran.r-project.org/web/packages/e1071/index.html)         | Support Vector Machine (SVM) classification                                   |
+| [caret](https://cran.r-project.org/web/packages/caret/index.html)         | Various machine learning tasks                                                |
+| [class](https://cran.r-project.org/web/packages/class/index.html)         | k-Nearest Neighbors (kNN) classification                                      |
 
 ### Data Cleaning/Preparation
 
