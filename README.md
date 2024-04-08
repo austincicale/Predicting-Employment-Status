@@ -65,7 +65,11 @@ Before creating predictive models, EDA involved exploring the 14 predictors rela
 
 ### Data Analysis
 
-To comprehend a basic relationship between our predictor variables and employment status, a logistic regression model was created using all variables and observations. This basic model portrayed most of our predictors as statistically significant, with exception of the variables representing # of family members in household, # of children in household, and veteran status. The model was used in attempt to predict all observations in the data set, and with a classification threshold of 0.5, the model predicted all observations to be employed. This portrays the imbalance within our data. One option to increase the number of unemployed predictions could be to decrease the classification threshold. But we decided to resample the training set of our data using the ROSE package to obtain more balanced observations.
+To comprehend the basic relationship between parameters and employment status, a logistic regression model was created to predict employment status using all variables and observations within the cleaned data set. This basic model portrayed most of the predictors as statistically significant, except FAMSIZE, NCHILD, and VETSTAT. However, with a classification threshold of 0.5, the basic logistic regression model predicted all observations to be employed. 
+
+with a classification threshold of 0.5, the model predicted all observations to be employed. This portrays the imbalance within our data. One option to increase the number of unemployed predictions could be to decrease the classification threshold. But we decided to resample the training set of our data using the ROSE package to obtain more balanced observations.
+
+
 In addition to logistic regression, other modeling techniques that we used to predict employment status include linear and quadratic discriminant analysis, classification trees, random forests, boosting, support vector machines, and k-nearest neighbor.
 
 ### Results/Findings
