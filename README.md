@@ -156,11 +156,27 @@ While each modeling technique produced slightly different outcomes, some common 
 
 ### Recommendations
 
-Content
+Based on the analysis, the following actions are recommended:
+  - Advocate for anti-discrimination legislation targeting age, gender, and race biases in employment.
+  - Promote policies that incentivize educational attainment for disadvantaged groups.
+  - Develop employment programs for demographic groups with lower employment rates.
+  - Increase access to career consulting services.
+  - Analyze the root causes of unemployment and examine the success of current and past initiatives.
+  - Study longitudinal employment trends to understand how predictors of employment status have evolved over time.
 
 ### Limitations
 
-The main limitation with our data is that 94% of the the respondents were employed, which makes sense, but it can make it challenging to explore the underlying relationships that differentiate employed and unemployed individuals. Classification modeling tends to favor individuals represented by the majority. To account for the imbalance in our data, we used the ROSE package in R to artificially balance our data through a bootstrap approach.
+##### 1. Data Collected from Single Year (2021)
+  - The study utilized data from the year 2021 due to its availability, which may limit the ability to capture longitudinal trends or changes over time in predictors of employment status.
+
+##### 2. High Proportion of Employed Respondents (94%):
+  - The disproportionate representation of employed individuals in the dataset may limit the ability to explore the underlying relationships that differentiate employed and unemployed individuals.
+
+##### 3. Imbalanced Class Representation in Modeling:
+  - Classification modeling tends to favor individuals from the majority class, potentially leading to biased predictions. To address this imbalance, the training set was artificially resampled, which could introduce limitations or biases in the analysis.
+
+##### 4. Subjective Variable Selection:
+    - Specific variables were selected based on personal beliefs about their potential significance as predictors of employment status. This subjective approach may overlook other potentially relevant variables, limiting the comprehensiveness of the analysis.
 
 ### References
 
