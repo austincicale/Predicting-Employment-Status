@@ -149,7 +149,10 @@ ggplot(variable_importance, aes(x = Variable, y = Importance)) +
 
 ### Results/Findings
 
-All of our models were created using the validation set approach. 70% of our data was randomly assigned to the training set and the remaining observations were assigned to the validation set. The ROSE package was then used on our training set to balance employment status representation. While each modeling technique produced slightly different outcomes, there were some common occurrences that were noticeable. Specifically, the veteran status appeared to have no significance according to every modeling method. Our classification tree model selected AGE, educational attainment, relation to household head, and sex as the variables for its tree construction. The importance of these variables was mirrored in our boosting model as it assigned the four highest variable importance values to these four variables. The RACE variable also consistently appeared to be of importance, especially according to our random forest model.
+While each modeling technique produced slightly different outcomes, some common occurrences were noticeable. The analysis results are summarized as follows:
+1. Veteran status (VETSTAT) exhibited insignificance across all models.
+2. The most influential predictors were AGE, educational attainment (EDUCD), relation to household head (RELATE), and SEX. This significance is evident in both the classification tree and boosting models. These two models, known for their balanced predictive capabilities, selected these variables as the most important.
+3. RACE consistently demonstrated significance, particularly highlighted by the random forest model, where it ranked third in importance, following AGE and EDUCD.
 
 ### Recommendations
 
@@ -161,5 +164,5 @@ The main limitation with our data is that 94% of the the respondents were employ
 
 ### References
 
-Content
+Textbook: 
 
