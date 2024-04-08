@@ -65,12 +65,86 @@ Before creating predictive models, EDA involved exploring the 14 predictors rela
 
 ### Data Analysis
 
-To comprehend the basic relationship between parameters and employment status, a logistic regression model was created to predict employment status using all variables and observations within the cleaned data set. This basic model portrayed most of the predictors as statistically significant, except FAMSIZE, NCHILD, and VETSTAT. However, with a classification threshold of 0.5, the basic logistic regression model predicted all observations to be employed. 
+To comprehend the basic relationship between parameters and employment status, a logistic regression model was created to predict employment status using all variables and observations within the cleaned data set. This basic model portrayed all predictors as statistically significant, except FAMSIZE, NCHILD, and VETSTAT. The statistical summary for this model is shown in *Table 2. Basic Logistic Regression Model*. 
 
-with a classification threshold of 0.5, the model predicted all observations to be employed. This portrays the imbalance within our data. One option to increase the number of unemployed predictions could be to decrease the classification threshold. But we decided to resample the training set of our data using the ROSE package to obtain more balanced observations.
+```r
+# Creating a basic logistic regression model using all cleaned data
+glm.emp1 <- glm(EMPSTAT ~., family = "binomial", data = data)
+summary(glm.emp1)
+```
+#### *Table 2. Basic Logistic Regression Model*
+<img width="566" alt="Screenshot 2024-04-08 at 11 17 26 AM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/bd57dfbe-3f01-4eac-8cdc-511d997424ab">
 
+Future models were created using the validation set approach, where 70% of the data was randomly assigned to the training set and the remaining 30% was assigned to the test or validation set. However, an issue surfaced concerning the basic logistic regression model's predictive performance. With a classification threshold of 0.5, the model predicted all observations to be "employed." This predictive behavior signifies a bias towards the majority class (employed individuals). The ROSE package in R was utilized to address the imbalance of class observations. Through sampling techniques and a smoothed bootstrap approach, the ROSE package artificially generated a new training set, mirroring its original size while mitigating the disparity in class distribution. Notably, the original training set exhibited over 93% “employed” observations, whereas the augmented training set achieved a more balanced representation, with approximately 50% “employed” observations. By training the models on data with improved class balance, we aim to enhance the discernment of variables impacting employment. Subsequently, the models constructed using the refined training set will be utilized to predict observations within the unaltered test set, allowing assessment of prediction accuracy.
 
-In addition to logistic regression, other modeling techniques that we used to predict employment status include linear and quadratic discriminant analysis, classification trees, random forests, boosting, support vector machines, and k-nearest neighbor.
+```r
+# Splitting data into training and test set
+set.seed(1)
+# Generating random indices for train-test split
+indices1 <- sample(1:nrow(data), size = round(0.7 * nrow(data)), replace = FALSE)
+# Creating training and testing sets
+train1 <- data[indices1, ]
+test1 <- data[-indices1, ]
+```
+```r
+# Perform oversampling on the training data to have more balanced classes
+library(ROSE)
+train2 <- ROSE(EMPSTAT ~., data = train1, seed = 123)$data
+```
+
+In addition to logistic regression, complementary modeling methods used throughout data analysis include LDA, QDA, classification trees, random forests, boosting, SVM, and kNN. Among all modeling techniques, the most accurate models with balanced predictive power for both employed and unemployed individuals were developed using classification trees and boosting. 
+
+```r
+# Train and test model using Classification Trees
+library(rpart)
+set.seed(1)
+tree_model <- rpart(EMPSTAT ~., data = train2, method = "class")
+predictions_tree <- predict(tree_model, newdata = test1, type = "class")
+# Create classification tree confusion matrix
+table(predictions_tree, test1$EMPSTAT)
+```
+#### *Classification Tree Confusion Matrix*
+<img width="545" alt="Screenshot 2024-04-08 at 12 44 35 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/ff45d322-44d6-421a-bae0-d29d5710727d">
+
+```r
+# Create visual representation of classification tree
+library(rpart.plot)
+printcp(tree_model)
+prp(tree_model, extra = 1, branch = 1, shadow.col = "gray", box.col = "lightblue", branch.lty = 3, tweak = 1.2)
+```
+#### *Classification Tree Predicting Employment Status*
+<img width="537" alt="Screenshot 2024-04-08 at 12 46 53 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/060f3820-13b1-4938-ab71-59f4072885ab">
+
+```r
+# Train and test model using Boosting
+library(gbm)
+set.seed(1)
+boost_model <- gbm(EMPSTAT ~., data = train2_boost, distribution = "bernoulli", n.trees = 100, interaction.depth = 3, shrinkage = 0.1)
+boost_pred <- predict(boost_model, newdata = test1_boost, type = "response", n.trees = 100)
+boost_pred_class <- ifelse(boost_pred > 0.5, 1, 0)
+# Create boosting confusion matrix
+table(boost_pred_class, test1_boost$EMPSTAT)
+```
+#### *Boosting Confusion Matrix*
+<img width="544" alt="Screenshot 2024-04-08 at 12 57 18 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/770eb30f-9f45-40a1-8702-098b575bbfe7">
+
+```r
+# Organize the boost_model summary into a relative influence data frame to determine variable importance
+variable_names <- c("EDUCD", "RELATE", "SEX", "AGE", "SPEAKENG", "MARST", "RACE", "FAMSIZE", "HISPAN", "YRSUSA2", "CITIZEN", "NCHILD", "SCHOOL", "VETSTAT")
+relative_influence <- c(26.8954659, 23.2950799, 11.5776106, 10.2749420, 5.8514439, 4.9117615, 4.1419822, 3.9308735, 3.4863497, 3.3267069, 1.0281384, 0.6561295, 0.6235162, 0.0000000)
+variable_importance <- data.frame(Variable <- factor(variable_names, levels = variable_names), Importance <- relative_influence)
+variable_importance <- variable_importance[order(-variable_importance$Importance), ]
+
+# Create a relative influence plot using variable_importance data frame
+ggplot(variable_importance, aes(x = Variable, y = Importance)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(x = "Variable", y = "Relative Influence") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  
+  geom_text(aes(label = round(Importance, 2)), vjust = -0.5)
+```
+#### *Boosting Relative Influence Plot*
+<img width="606" alt="Screenshot 2024-04-08 at 1 09 48 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/a76521c2-21da-4c92-8319-2732d9dfe775">
+
 
 ### Results/Findings
 
