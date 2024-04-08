@@ -92,7 +92,7 @@ library(ROSE)
 train2 <- ROSE(EMPSTAT ~., data = train1, seed = 123)$data
 ```
 
-In addition to logistic regression, complementary modeling methods used throughout data analysis include LDA, QDA, classification trees, random forests, boosting, SVM, and kNN. Among all modeling techniques, the most accurate models with balanced predictive power for both employed and unemployed individuals were developed using classification trees and boosting. 
+In addition to logistic regression, complementary modeling methods used throughout data analysis include LDA, QDA, classification trees, random forests, boosting, SVM, and kNN. Among all modeling techniques, the most accurate models with balanced predictive power for both employed and unemployed individuals were developed using classification trees and boosting. The predictive accuracy of these models can be observed through their respective confusion matrices. Furthermore, the output of the classification tree model is depicted in the figure titled *Classification Tree Predicting Employment Status*, while the most significant variables according to the boosting model are illustrated in its relative influence plot.
 
 ```r
 # Train and test model using Classification Trees
@@ -100,6 +100,7 @@ library(rpart)
 set.seed(1)
 tree_model <- rpart(EMPSTAT ~., data = train2, method = "class")
 predictions_tree <- predict(tree_model, newdata = test1, type = "class")
+
 # Create classification tree confusion matrix
 table(predictions_tree, test1$EMPSTAT)
 ```
@@ -122,6 +123,7 @@ set.seed(1)
 boost_model <- gbm(EMPSTAT ~., data = train2_boost, distribution = "bernoulli", n.trees = 100, interaction.depth = 3, shrinkage = 0.1)
 boost_pred <- predict(boost_model, newdata = test1_boost, type = "response", n.trees = 100)
 boost_pred_class <- ifelse(boost_pred > 0.5, 1, 0)
+
 # Create boosting confusion matrix
 table(boost_pred_class, test1_boost$EMPSTAT)
 ```
@@ -144,7 +146,6 @@ ggplot(variable_importance, aes(x = Variable, y = Importance)) +
 ```
 #### *Boosting Relative Influence Plot*
 <img width="606" alt="Screenshot 2024-04-08 at 1 09 48 PM" src="https://github.com/austincicale/Predicting-Employment-Status/assets/77798880/a76521c2-21da-4c92-8319-2732d9dfe775">
-
 
 ### Results/Findings
 
