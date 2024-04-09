@@ -176,8 +176,9 @@ Based on the analysis, the following actions are recommended:
   - Classification modeling tends to favor individuals from the majority class, potentially leading to biased predictions. To address this imbalance, the training set was artificially resampled, which could introduce limitations or biases in the analysis.
 
 ##### 4. Subjective Variable Selection:
-    - Specific variables were selected based on personal beliefs about their potential significance as predictors of employment status. This subjective approach may overlook other potentially relevant variables, limiting the comprehensiveness of the analysis.
+  - Specific variables were selected based on personal beliefs about their potential significance as predictors of employment status. This subjective approach may overlook other potentially relevant variables, limiting the comprehensiveness of the analysis.
 
+    
 ### References
 
 Textbook: [An Introduction to Statistical Learning](https://www.statlearning.com/) 
